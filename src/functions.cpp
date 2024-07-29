@@ -67,7 +67,7 @@ void printGrid(int grid[][COL], Pair src, Pair dest) {
             else
                 std::cout << ".  "; // Any other cell
         }
-        std::cout << "\n";
+        std::cout << "\n\n";
     }
 }
 
@@ -83,8 +83,6 @@ void clearTemporaryPath(int grid[][COL]) {
 
 void aStarSearch(int grid[][COL], Pair src, Pair dest) {
   
-    bool closedList[ROW][COL]; //A bool array to check whether the algorithm has been on any (x, y) location.
-    memset(closedList, false, sizeof(closedList));
 
     Cell cells[ROW][COL];
 
@@ -106,7 +104,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest) {
     cells[x][y].hCost = 0.0;
     cells[x][y].parent_x = x;
     cells[x][y].parent_y = y;
-
+    
     std::set<pPair> openList;
     openList.insert(std::make_pair(0.0, std::make_pair(x, y)));
 
@@ -117,7 +115,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest) {
         openList.erase(openList.begin());
         x = p.second.first;
         y = p.second.second;
-        closedList[x][y] = true;
+        cells[x][y].isPassed = true;
 
         for (int add_x = -1; add_x <= 1; add_x++) {
             for (int add_y = -1; add_y <= 1; add_y++) {
@@ -135,7 +133,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest) {
                         printGrid(grid, src, dest);
                         return;
                     }
-                    else if (!closedList[new_x][new_y] && isNotBlocked(grid, new_x, new_y)) {
+                    else if (!cells[new_x][new_y].isPassed && isNotBlocked(grid, new_x, new_y)) {
                         double gNew = cells[x][y].gCost + ((add_x == 0 || add_y == 0) ? 1.0 : 1.414);
                         double hNew = calculateHCostValue(new_x, new_y, dest);
                         double fNew = gNew + hNew;
