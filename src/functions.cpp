@@ -26,7 +26,7 @@ void trackPath(Cell cells[][COL], Pair dest, int grid[][COL]) {
 
     std::stack<Pair> Path;
 
-    //Starts from the destination, checks if parent(previous) cordinates of the cell is equal to current.
+    //Starts from the destination, checks if parent(previous) coordinates of the cell is equal to current.
     //If it's not equal, then the pair will be pushed into the Pair stack.
     //There, it updates the current row and col value of cell to its parent(previous) one.
 
@@ -82,19 +82,7 @@ void clearTemporaryPath(int grid[][COL]) {
 }
 
 void aStarSearch(int grid[][COL], Pair src, Pair dest) {
-    if (!isReachable(src.first, src.second) || !isReachable(dest.first, dest.second)) {
-        std::cout << "Source or destination is out of range!\n";
-        return;
-    }
-    if (!isNotBlocked(grid, src.first, src.second) || !isNotBlocked(grid, dest.first, dest.second)) {
-        std::cout << "Source or destination is blocked!\n";
-        return;
-    }
-    if (isDestination(src.first, src.second, dest)) {
-        printf_s("We are already at the destination. --> (%d, %d)\n", src.first, src.second);
-        return;
-    }
-
+  
     bool closedList[ROW][COL]; //A bool array to check whether the algorithm has been on any (x, y) location.
     memset(closedList, false, sizeof(closedList));
 
