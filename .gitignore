@@ -6,4 +6,5 @@
 
 # Ignore build directories
 x64/
-Debug/
+.vs/
+.git/
