@@ -55,6 +55,7 @@ int main() {
     std::cin.get();
 
     aStarSearch(grid, src, dest);
+    std::cin.get(); //Blocks the instant shutdown when ran on .exe
 
     return 0;
 }
