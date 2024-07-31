@@ -12,6 +12,7 @@
 #include <chrono>
 #include <thread>
 #include <cstdlib>
+#include <ctime>
 
 constexpr int ROW = 10;
 constexpr int COL = 10;
@@ -27,9 +28,9 @@ typedef std::pair<double, std::pair<int, int>> pPair; // Creating a shortcut for
 
 struct Cell {
     
-    int parent_x, parent_y; // Previous Row and Column index of a cell.
+    int parent_x = -1, parent_y = -1; // Previous Row and Column index of a cell.
 
-    double fCost, gCost, hCost; // fCost = gCost + hCost
+    double fCost = FLT_MAX, gCost = FLT_MAX, hCost = FLT_MAX; // fCost = gCost + hCost
 
     bool isPassed = false;
 };
@@ -41,6 +42,7 @@ bool isDestination(int row, int col, Pair dest);         // A function to check 
 
 
 double calculateHCostValue(int row, int col, Pair dest);  // A function to calculate the 'hCost' heuristics with Manhattan Distance.
+double calculateTime(clock_t start, clock_t end); // Calculates the time to find the path.
 
 
 void printGrid(int grid[][COL], Pair src, Pair dest);
@@ -50,6 +52,8 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest); // A Function to find th
                                                         // to A* Search Algorithm.
 
 void clearTemporaryPath(int grid[][COL]); //Clears the temporary path that the algorithm tried.
-void clearConsole();
+void clearConsole(); //Helps for the visualization.
+
+void start(); //Starts the whole program.
 
 #endif //FUNCTIONS_H

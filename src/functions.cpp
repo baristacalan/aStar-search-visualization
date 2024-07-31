@@ -15,9 +15,13 @@ bool isDestination(int row, int col, Pair dest) {
 }
 
 double calculateHCostValue(int row, int col, Pair dest) {
-    //return (double)sqrt(pow(row - dest.first, 2) + pow(col - dest.second, 2));
+    
     return static_cast<double>(sqrt(pow(row - dest.first, 2) + pow(col - dest.second, 2)));
 }   
+
+double calculateTime(clock_t start, clock_t end) {
+    return static_cast<double>(end - start) / CLOCKS_PER_SEC;
+}
 
 void trackPath(Cell cells[][COL], Pair dest, int grid[][COL]) {
     std::cout << "The path is: ";
@@ -88,15 +92,15 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest) {
 
     int x = 0, y = 0;
 
-    for (x = 0; x < ROW; x++) {
-        for (y = 0; y < COL; y++) {
-            cells[x][y].fCost = FLT_MAX;
-            cells[x][y].gCost = FLT_MAX;
-            cells[x][y].hCost = FLT_MAX;
-            cells[x][y].parent_x = -1;
-            cells[x][y].parent_y = -1;
-        }
-    }
+    //for (x = 0; x < ROW; x++) {
+    //    for (y = 0; y < COL; y++) {
+    //        cells[x][y].fCost = FLT_MAX;
+    //        cells[x][y].gCost = FLT_MAX;
+    //        cells[x][y].hCost = FLT_MAX;
+    //        cells[x][y].parent_x = -1;
+    //        cells[x][y].parent_y = -1;
+    //    }
+    //}
 
     x = src.first, y = src.second;
     cells[x][y].fCost = 0.0;
@@ -105,14 +109,14 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest) {
     cells[x][y].parent_x = x;
     cells[x][y].parent_y = y;
     
-    std::set<pPair> openList;
-    openList.insert(std::make_pair(0.0, std::make_pair(x, y)));
+    std::set<pPair> possiblePaths;
+    possiblePaths.insert(std::make_pair(0.0, std::make_pair(x, y)));
 
     bool foundDest = false;
 
-    while (!openList.empty()) {
-        pPair p = *openList.begin();
-        openList.erase(openList.begin());
+    while (!possiblePaths.empty()) {
+        pPair p = *possiblePaths.begin();
+        possiblePaths.erase(possiblePaths.begin());
         x = p.second.first;
         y = p.second.second;
         cells[x][y].isPassed = true;
@@ -139,7 +143,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest) {
                         double fNew = gNew + hNew;
 
                         if (cells[new_x][new_y].fCost == FLT_MAX || cells[new_x][new_y].fCost > fNew) {
-                            openList.insert(std::make_pair(fNew, std::make_pair(new_x, new_y)));
+                            possiblePaths.insert(std::make_pair(fNew, std::make_pair(new_x, new_y)));
                             cells[new_x][new_y].fCost = fNew;
                             cells[new_x][new_y].gCost = gNew;
                             cells[new_x][new_y].hCost = hNew;
@@ -173,4 +177,86 @@ void clearConsole() {
     #else
         std::system("clear");
     #endif
+}
+
+void start() {
+
+    /* Description of the Grid-
+ 1--> The cell is not blocked
+ 0--> The cell is blocked    */
+
+    std::cout << "Welcome to the A* path finding visualization.\n";
+    std::cout << "Here is the grid bellow. S and D are temporarily set.\n";
+    int grid[ROW][COL]
+        = { { 1, 0, 1, 1, 1, 1, 0, 1, 1, 1 },
+            { 1, 1, 1, 0, 1, 1, 1, 0, 1, 1 },
+            { 1, 1, 1, 0, 1, 1, 0, 1, 0, 1 },
+            { 0, 0, 1, 0, 1, 0, 0, 0, 0, 1 },
+            { 1, 1, 1, 0, 1, 1, 1, 0, 1, 0 },
+            { 1, 0, 1, 1, 1, 1, 0, 1, 0, 0 },
+            { 1, 0, 0, 0, 0, 1, 0, 0, 0, 1 },
+            { 1, 0, 1, 1, 1, 0, 1, 1, 0, 0 },
+            { 1, 1, 1, 0, 0, 0, 1, 0, 1, 1 },
+            { 1, 1, 1, 1, 0, 0, 1, 0, 1, 1 } };
+
+    Pair src = std::make_pair(0, 0);
+    Pair dest = std::make_pair(9, 9);
+
+    printGrid(grid, src, dest);
+    std::cout << "\n";
+
+    int x_src = 0, y_src = 0, x_dest = 0, y_dest = 0;
+    bool valid_coordinates = false;
+
+    while (!valid_coordinates) {
+
+        //Getting the input for row of source.
+
+        std::cout << "Enter x of source [0, 9]: ";
+        std::cin >> x_src;
+
+        //Getting the input for column of source.
+        std::cout << "Enter y of source [0, 9]: ";
+        std::cin >> y_src;
+
+        //Getting the input for row of destination.
+        std::cout << "Enter x of destination [0, 9]: ";
+        std::cin >> x_dest;
+
+        //Getting the input for row of destination.
+        std::cout << "Enter y of destination [0, 9]: ";
+        std::cin >> y_dest;
+
+        //Creating the pairs of source and destination locations.
+        src = std::make_pair(x_src, y_src);
+        dest = std::make_pair(x_dest, y_dest);
+
+        if (!isReachable(src.first, src.second) || !isReachable(dest.first, dest.second)) {
+            std::cout << "Source or destination is out of range! Try again.\n";
+        }
+        else if (!isNotBlocked(grid, src.first, src.second) || !isNotBlocked(grid, dest.first, dest.second)) {
+            std::cout << "Source or destination is blocked! Try again.\n";
+        }
+        else if (isDestination(src.first, src.second, dest)) {
+            printf_s("Destination and source are the same. --> (%d, %d) Try again.\n", src.first, src.second);
+        }
+        else {
+            std::cout << "Coordinates valid. Source and Destination are set.\n";
+            valid_coordinates = true;
+        }
+    }
+
+    printGrid(grid, src, dest);
+    std::cout << "Press Enter to start...\n";
+    std::cin.ignore();
+    std::cin.get();
+
+    clock_t start = 0, end = 0;
+
+    start = clock();
+    aStarSearch(grid, src, dest);
+    end = clock();
+    double search_time = calculateTime(start, end);
+    std::cout << "Found path in " << search_time << " seconds.\n";
+    std::cin.get(); //Blocks the instant shutdown when ran on .exe
 }
