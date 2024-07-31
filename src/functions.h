@@ -13,6 +13,9 @@
 #include <thread>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm>
+#include <vector>
+#include <random>
 
 constexpr int ROW = 10;
 constexpr int COL = 10;
@@ -45,6 +48,7 @@ double calculateHCostValue(int row, int col, Pair dest);  // A function to calcu
 double calculateTime(clock_t start, clock_t end); // Calculates the time to find the path.
 
 
+void generateRandomGrid(int grid[][COL], double block_ratio);
 void printGrid(int grid[][COL], Pair src, Pair dest);
 void trackPath(Cell cellDetails[][COL], Pair dest, int grid[][COL]); // A function to track the path from destination to source.
 void aStarSearch(int grid[][COL], Pair src, Pair dest); // A Function to find the shortest path between

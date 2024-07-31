@@ -2,7 +2,7 @@
 
 int main() {
 
-    start();
+    start(); //Starts the whole program.
    
     return 0;
 }

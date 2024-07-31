@@ -90,19 +90,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest) {
 
     Cell cells[ROW][COL];
 
-    int x = 0, y = 0;
-
-    //for (x = 0; x < ROW; x++) {
-    //    for (y = 0; y < COL; y++) {
-    //        cells[x][y].fCost = FLT_MAX;
-    //        cells[x][y].gCost = FLT_MAX;
-    //        cells[x][y].hCost = FLT_MAX;
-    //        cells[x][y].parent_x = -1;
-    //        cells[x][y].parent_y = -1;
-    //    }
-    //}
-
-    x = src.first, y = src.second;
+    int x = src.first, y = src.second;
     cells[x][y].fCost = 0.0;
     cells[x][y].gCost = 0.0;
     cells[x][y].hCost = 0.0;
@@ -152,7 +140,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest) {
 
                             // Visualize the step
                             grid[new_x][new_y] = 3; // Temporary marker
-                            std::this_thread::sleep_for(std::chrono::milliseconds(300)); // Delay for visualization
+                            std::this_thread::sleep_for(std::chrono::milliseconds(290)); // Delay for visualization
                             clearConsole(); // Clear console
                             printGrid(grid, src, dest);
                             clearTemporaryPath(grid); // Clear temporary markers
@@ -168,6 +156,27 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest) {
     }
     std::cout << "\n";
     printGrid(grid, src, dest);
+}
+
+void generateRandomGrid(int grid[][COL], double block_ratio = 0.3) {
+
+    //Necessary variables to generate randon 0's and 1's.
+    std::random_device rd;
+    std::mt19937 mt_engine(rd());
+
+    int total_cells = ROW * COL;
+    int block_num = static_cast<int>(total_cells * block_ratio);
+
+    std::vector<int> values(total_cells, 1);
+    std::fill(values.begin(), values.begin() + block_num, 0);
+    std::shuffle(values.begin(), values.end(), mt_engine);
+
+    for (int i = 0; i < ROW; i++) {
+        for (int j = 0; j < COL; j++) {
+            grid[i][j] = values.at(i * COL + j);
+        }
+    }
+
 }
 
 void clearConsole() {
