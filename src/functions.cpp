@@ -1,48 +1,44 @@
 #include "functions.h"
 
-bool isReachable(int row, int col) {
-    return (row >= 0) && (row < ROW) && (col >= 0) && (col < COL);
+// Check if the given cell is within the grid boundaries
+bool isReachable(int x, int y) {
+    return (x >= 0) && (x < ROW) && (y >= 0) && (y < COL);
 }
 
-bool isNotBlocked(int grid[][COL], int row, int col) {
-    if (grid[row][col] == 1) return true;
-    else return false;
+// Check if the given cell is not blocked
+bool isNotBlocked(int grid[][COL], int x, int y) {
+    return grid[x][y] == 1;
 }
 
-bool isDestination(int row, int col, Pair dest) {
-    if (dest.first == row && dest.second == col) return true;
-    else return false;
+// Check if the given cell is the destination
+bool isAtDestination(int x, int y, Pair dest) {
+    return dest.first == x && dest.second == y;
 }
 
-double calculateHCostValue(int row, int col, Pair dest) {
-    
-    return static_cast<double>(sqrt(pow(row - dest.first, 2) + pow(col - dest.second, 2)));
-}   
-
-double calculateTime(clock_t start, clock_t end) {
-    return static_cast<double>(end - start) / CLOCKS_PER_SEC;
+// Calculate the heuristic cost from the current cell to the destination
+double calculateHCostValue(int x, int col, Pair dest) {
+    return static_cast<double>(sqrt(pow(x - dest.first, 2) + pow(col - dest.second, 2)));
 }
 
+// Trace the path from the destination to the source
 void trackPath(Cell cells[][COL], Pair dest, int grid[][COL]) {
     std::cout << "The path is: ";
-    int row = dest.first;
-    int col = dest.second;
+    int x = dest.first;
+    int y = dest.second;
 
     std::stack<Pair> Path;
 
-    //Starts from the destination, checks if parent(previous) coordinates of the cell is equal to current.
-    //If it's not equal, then the pair will be pushed into the Pair stack.
-    //There, it updates the current row and col value of cell to its parent(previous) one.
-
-    while (!(cells[row][col].parent_x == row && cells[row][col].parent_y == col)) {
-        Path.push(std::make_pair(row, col));
-        int temp_row = cells[row][col].parent_x;
-        int temp_col = cells[row][col].parent_y;
-        row = temp_row;
-        col = temp_col;
+    // Trace the path back to the source
+    while (!(cells[x][y].parent_x == x && cells[x][y].parent_y == y)) {
+        Path.push(std::make_pair(x, y));
+        int temp_row = cells[x][y].parent_x;
+        int temp_col = cells[x][y].parent_y;
+        x = temp_row;
+        y = temp_col;
     }
-    Path.push(std::make_pair(row, col));
+    Path.push(std::make_pair(x, y));
 
+    // Mark the path on the grid
     while (!Path.empty()) {
         Pair p = Path.top();
         Path.pop();
@@ -52,6 +48,7 @@ void trackPath(Cell cells[][COL], Pair dest, int grid[][COL]) {
     return;
 }
 
+// Print the grid with the source and destination marked
 void printGrid(int grid[][COL], Pair src, Pair dest) {
     std::cout << "\n";
     for (int x = 0; x < ROW; x++) {
@@ -75,6 +72,7 @@ void printGrid(int grid[][COL], Pair src, Pair dest) {
     }
 }
 
+// Clear temporary path markers from the grid
 void clearTemporaryPath(int grid[][COL]) {
     for (int x = 0; x < ROW; x++) {
         for (int y = 0; y < COL; y++) {
@@ -85,10 +83,11 @@ void clearTemporaryPath(int grid[][COL]) {
     }
 }
 
+// A* Search algorithm to find the shortest path
 void aStarSearch(int grid[][COL], Pair src, Pair dest) {
-  
-
     Cell cells[ROW][COL];
+
+    clock_t start = clock();
 
     int x = src.first, y = src.second;
     cells[x][y].fCost = 0.0;
@@ -96,7 +95,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest) {
     cells[x][y].hCost = 0.0;
     cells[x][y].parent_x = x;
     cells[x][y].parent_y = y;
-    
+
     std::set<pPair> possiblePaths;
     possiblePaths.insert(std::make_pair(0.0, std::make_pair(x, y)));
 
@@ -115,14 +114,17 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest) {
                 int new_x = x + add_x;
                 int new_y = y + add_y;
                 if (isReachable(new_x, new_y)) {
-                    if (isDestination(new_x, new_y, dest)) {
-                        cells[new_x][new_y].parent_x = x; //Previous value of x to track.
-                        cells[new_x][new_y].parent_y = y; // Previous value of y to track.
+                    if (isAtDestination(new_x, new_y, dest)) {
+                        clock_t end = clock();
+                        double search_time = calculateTime(start, end);
+                        cells[new_x][new_y].parent_x = x;
+                        cells[new_x][new_y].parent_y = y;
                         printf("The destination cell is found\n");
                         trackPath(cells, dest, grid);
                         foundDest = true;
                         std::cout << "\n";
                         printGrid(grid, src, dest);
+                        std::cout << "Found path in " << search_time << " seconds.\n";
                         return;
                     }
                     else if (!cells[new_x][new_y].isPassed && isNotBlocked(grid, new_x, new_y)) {
@@ -135,8 +137,8 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest) {
                             cells[new_x][new_y].fCost = fNew;
                             cells[new_x][new_y].gCost = gNew;
                             cells[new_x][new_y].hCost = hNew;
-                            cells[new_x][new_y].parent_x = x; //Previous value of x to track.
-                            cells[new_x][new_y].parent_y = y; //Previous value of y to track.
+                            cells[new_x][new_y].parent_x = x;
+                            cells[new_x][new_y].parent_y = y;
 
                             // Visualize the step
                             grid[new_x][new_y] = 3; // Temporary marker
@@ -158,55 +160,65 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest) {
     printGrid(grid, src, dest);
 }
 
-void generateRandomGrid(int grid[][COL], double block_ratio = 0.3) {
+// Clear the console screen
+void clearConsole() {
+#ifdef _WIN32
+    std::system("cls");
+#else
+    std::system("clear");
+#endif
+}
 
-    //Necessary variables to generate randon 0's and 1's.
+// Calculate the time elapsed between start and end
+double calculateTime(clock_t start, clock_t end) {
+    return static_cast<double>(end - start) / CLOCKS_PER_SEC;
+}
+
+// Generate a random grid with a given block ratio
+void generateRandomGrid(int grid[][COL], double block_ratio) {
     std::random_device rd;
     std::mt19937 mt_engine(rd());
 
     int total_cells = ROW * COL;
     int block_num = static_cast<int>(total_cells * block_ratio);
 
-    std::vector<int> values(total_cells, 1);
-    std::fill(values.begin(), values.begin() + block_num, 0);
-    std::shuffle(values.begin(), values.end(), mt_engine);
+    std::vector<int> values(total_cells, 1); // Creates a vector storing total_cells amount of 1's.
+    std::fill(values.begin(), values.begin() + block_num, 0); // Filling the vector from the beginning till the block_num th.
+    std::shuffle(values.begin(), values.end(), mt_engine); // Shuffle's the vector.
 
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++) {
-            grid[i][j] = values.at(i * COL + j);
+            grid[i][j] = values.at(i * COL + j); // Assigning the values to the grid array.
         }
     }
-
+    grid[0][0] = 1; // Ensure the starting point is not blocked
+    grid[9][9] = 1; // Ensure the ending point is not blocked
 }
 
-void clearConsole() {
-
-    #ifdef _WIN32
-        std::system("cls");
-    #else
-        std::system("clear");
-    #endif
-}
-
-void start() {
+// Main function to start the program with either a random or predefined grid
+void start(bool generate_random) {
 
     /* Description of the Grid-
- 1--> The cell is not blocked
- 0--> The cell is blocked    */
+    1--> The cell is not blocked
+    0--> The cell is blocked    */
 
-    std::cout << "Welcome to the A* path finding visualization.\n";
-    std::cout << "Here is the grid bellow. S and D are temporarily set.\n";
-    int grid[ROW][COL]
-        = { { 1, 0, 1, 1, 1, 1, 0, 1, 1, 1 },
-            { 1, 1, 1, 0, 1, 1, 1, 0, 1, 1 },
-            { 1, 1, 1, 0, 1, 1, 0, 1, 0, 1 },
-            { 0, 0, 1, 0, 1, 0, 0, 0, 0, 1 },
-            { 1, 1, 1, 0, 1, 1, 1, 0, 1, 0 },
-            { 1, 0, 1, 1, 1, 1, 0, 1, 0, 0 },
-            { 1, 0, 0, 0, 0, 1, 0, 0, 0, 1 },
-            { 1, 0, 1, 1, 1, 0, 1, 1, 0, 0 },
-            { 1, 1, 1, 0, 0, 0, 1, 0, 1, 1 },
-            { 1, 1, 1, 1, 0, 0, 1, 0, 1, 1 } };
+    int grid[ROW][COL];
+
+    if (generate_random)
+        generateRandomGrid(grid, 0.4);
+    else {
+        int predefined_grid[ROW][COL] = { { 1, 0, 1, 1, 1, 1, 0, 1, 1, 1 },
+                           { 1, 1, 1, 0, 1, 1, 1, 0, 1, 1 },
+                           { 1, 1, 1, 0, 1, 1, 0, 1, 0, 1 },
+                           { 0, 0, 1, 0, 1, 0, 0, 0, 0, 1 },
+                           { 1, 1, 1, 0, 1, 1, 1, 0, 1, 0 },
+                           { 1, 0, 1, 1, 1, 1, 0, 1, 0, 0 },
+                           { 1, 0, 0, 0, 0, 1, 0, 0, 0, 1 },
+                           { 1, 0, 1, 1, 1, 0, 1, 1, 0, 0 },
+                           { 1, 1, 1, 0, 0, 0, 1, 0, 1, 1 },
+                           { 1, 1, 1, 1, 0, 0, 1, 0, 1, 1 } };
+        std::copy(&predefined_grid[0][0], &predefined_grid[0][0] + ROW * COL, &grid[0][0]);
+    }
 
     Pair src = std::make_pair(0, 0);
     Pair dest = std::make_pair(9, 9);
@@ -218,25 +230,23 @@ void start() {
     bool valid_coordinates = false;
 
     while (!valid_coordinates) {
-
-        //Getting the input for row of source.
-
+        // Getting the input for row of source
         std::cout << "Enter x of source [0, 9]: ";
         std::cin >> x_src;
 
-        //Getting the input for column of source.
+        // Getting the input for column of source
         std::cout << "Enter y of source [0, 9]: ";
         std::cin >> y_src;
 
-        //Getting the input for row of destination.
+        // Getting the input for row of destination
         std::cout << "Enter x of destination [0, 9]: ";
         std::cin >> x_dest;
 
-        //Getting the input for row of destination.
+        // Getting the input for column of destination
         std::cout << "Enter y of destination [0, 9]: ";
         std::cin >> y_dest;
 
-        //Creating the pairs of source and destination locations.
+        // Creating the pairs of source and destination locations
         src = std::make_pair(x_src, y_src);
         dest = std::make_pair(x_dest, y_dest);
 
@@ -246,7 +256,7 @@ void start() {
         else if (!isNotBlocked(grid, src.first, src.second) || !isNotBlocked(grid, dest.first, dest.second)) {
             std::cout << "Source or destination is blocked! Try again.\n";
         }
-        else if (isDestination(src.first, src.second, dest)) {
+        else if (isAtDestination(src.first, src.second, dest)) {
             printf_s("Destination and source are the same. --> (%d, %d) Try again.\n", src.first, src.second);
         }
         else {
@@ -260,12 +270,8 @@ void start() {
     std::cin.ignore();
     std::cin.get();
 
-    clock_t start = 0, end = 0;
+    clock_t start_time = 0, end_time = 0;
 
-    start = clock();
     aStarSearch(grid, src, dest);
-    end = clock();
-    double search_time = calculateTime(start, end);
-    std::cout << "Found path in " << search_time << " seconds.\n";
-    std::cin.get(); //Blocks the instant shutdown when ran on .exe
 }
+
