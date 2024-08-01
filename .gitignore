@@ -7,3 +7,4 @@
 # Ignore build directories
 x64/
 .vs/
+.git/
